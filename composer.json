@@ -1,0 +1,16 @@
+{
+    "name": "skills/tbi-payment-gateway",
+    "type": "wordpress-plugin",
+    "autoload": {
+        "psr-4": {
+            "Skills\\TbiPaymentGateway\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "StYankov",
+            "email": "st.yankov00@gmail.com"
+        }
+    ],
+    "require": {}
+}
