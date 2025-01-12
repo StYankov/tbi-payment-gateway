@@ -1,0 +1,55 @@
+.bnpl-options__description {
+    margin-bottom: 12px;
+}
+
+.bnpl-installment {
+    margin-bottom: 8px;
+}
+
+.loan-params {
+    display: grid;
+    gap: 10px;
+}
+
+.loan-params__row {
+    display: flex;
+    flex-direction: column;
+}
+
+.loan-params__label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.loan-params__value {
+    font-size: 17px;
+}
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    text-align: center;
+    border: 1px solid #000;
+    transition: 0.3s ease-out;
+}
+
+.info-icon svg {
+    width: 3.5px;
+    height: auto;
+}
+
+.info-icon svg path {
+    transition: 0.3s ease-out;
+}
+
+.info-icon:hover {
+    background-color: #000;
+}
+
+.info-icon:hover svg path {
+    fill: #fff;
+}

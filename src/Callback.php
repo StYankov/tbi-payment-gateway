@@ -39,6 +39,8 @@ class Callback {
 
         $order = $this->get_order( $request->get_param( 'orderNumber' ) );
 
+        WC()->mailer();
+
         $order->payment_complete();
 
         return new WP_REST_Response( [ 'success' => true ] );

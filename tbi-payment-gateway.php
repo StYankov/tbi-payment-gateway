@@ -18,4 +18,6 @@ if( ! defined( 'ABSPATH' ) ) {
 
 require __DIR__ . '/vendor/autoload.php';
 
+define( 'TBI_PAYMENT_GATEWAY_FILE', __FILE__ );
+
 add_action( 'plugins_loaded', [ \Skills\TbiPaymentGateway\Plugin::class, 'init' ] );
