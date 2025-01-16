@@ -2,8 +2,6 @@
 
 namespace Skills\TbiPaymentGateway;
 
-use SKills\TbiPaymentGateway\BNPLCallback;
-
 final class Plugin {
     private static ?self $instance = null;
 

@@ -102,8 +102,6 @@ class BNPLClient {
 
         $data = json_decode( wp_remote_retrieve_body( $response ), true );
 
-        var_dump( $data ); exit;
-
         if( ! is_array( $data ) || ! isset( $data['error'] ) || $data['error'] !== 0 ) {
             throw new Exception( __( 'Loan application request failed', 'tbi-payment-gateway' ), 400 );
         }
