@@ -2,25 +2,20 @@
 
 namespace Skills\TbiPaymentGateway;
 
+use SKills\TbiPaymentGateway\BNPLCallback;
+
 final class Plugin {
     private static ?self $instance = null;
 
     private function __construct() {
-        add_filter( 'woocommerce_payment_gateways', [ $this, 'register_gateways' ] );
         add_action( 'rest_api_init', [ $this, 'register_rest' ] );
 
         new Checkout();
     }
 
-    public function register_gateways( $methods ) {
-        $methods[ 'tbi' ] = 'Skills\TbiPaymentGateway\Gateways\TBIPaymentGateway';
-        $methods[ 'tbi-bnpl' ] = 'Skills\TbiPaymentGateway\Gateways\TBIBNPLPaymentGateway';
-
-        return $methods;
-    }
-
     public function register_rest() {
         new Callback();
+        new BNPLCallback();
     }
 
     public static function init() {

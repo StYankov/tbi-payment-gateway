@@ -36,29 +36,19 @@ class BNPLClient {
     /**
      * @return array{'order_id': int, 'token': string, 'url': string}
      */
-    public function create_application( WC_Order $order, int $installment_id ) {
-        $installment  = $this->get_installment( $installment_id );
-
-        if( empty( $installment ) ) {
-            throw new Exception( __( 'Installment plan not found', 'tbi-payment-gateway' ), 400 );
-        }
-
+    public function create_application( WC_Order $order, ?int $installment_id  = null ) {
         $order_items  = [];
 
         foreach( $order->get_items() as $order_item ) {
             /** @var \WC_Product $product */
             $product = $order_item->get_product();
 
-            if( empty( $product->get_category_ids() ) ) {
-                continue;
-            }
-
             $order_items[] = [
                 'name'  => $order_item->get_name(),
                 'qty'   => absint( $order_item->get_quantity() ),
                 'price' => round( floatval( $order_item->get_total() ) / $order_item->get_quantity(), 2 ),
                 'sku'   => $product->get_id(),
-                'category' => ! empty( $product->get_category_ids() ) ? $product->get_category_ids()[ 0 ] : 1,
+                'category'  => 255,
                 'imagelink' => get_the_post_thumbnail_url( $product->get_id() ),
             ];
         }
@@ -73,13 +63,24 @@ class BNPLClient {
             'lastname'           => $order->get_billing_last_name(),
             'email'              => $order->get_billing_email(),
             'phone'              => $order->get_billing_phone(),
-            'period'             => $installment['period'],
-            'bnpl'               => 1,
             'items'              => $order_items,
             'failRedirectURL'    => wc_get_checkout_url(),
             'successRedirectURL' => $order->get_checkout_order_received_url(),
-            'statusURL'          => rest_url( 'tbi/v1/callback' )
+            'statusURL'          => rest_url( 'tbi/v1/bnpl/callback' )
         ];
+
+        if( $installment_id !== null ) {
+            $installment  = $this->get_installment( $installment_id );
+
+            if( empty( $installment ) ) {
+                throw new Exception( __( 'Installment plan not found', 'tbi-payment-gateway' ), 400 );
+            }
+
+            $order_data['period'] = $installment['period'];
+            $order_data['promo']  = $installment['total_due_factor'] === 1;
+        } else {
+            $order_data['bnpl'] = 1;
+        }
 
         $body = [
             'reseller_code' => $this->resellerCode,
@@ -100,6 +101,8 @@ class BNPLClient {
         }
 
         $data = json_decode( wp_remote_retrieve_body( $response ), true );
+
+        var_dump( $data ); exit;
 
         if( ! is_array( $data ) || ! isset( $data['error'] ) || $data['error'] !== 0 ) {
             throw new Exception( __( 'Loan application request failed', 'tbi-payment-gateway' ), 400 );

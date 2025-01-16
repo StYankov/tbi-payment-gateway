@@ -8,6 +8,7 @@ class Checkout {
     public function __construct() {
         add_filter( 'woocommerce_available_payment_gateways', [ $this, 'maybe_hide_bnpl_method' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'maybe_enqueue_checkout_script' ] );
+        add_filter( 'woocommerce_payment_gateways', [ $this, 'register_gateways' ] );
     }
 
     public function maybe_hide_bnpl_method( array $gateways ) {
@@ -19,12 +20,19 @@ class Checkout {
             BNPLClient::get_client();
         } catch( Exception $e ) {
             unset( $gateways['tbi-bnpl'] );
+            unset( $gateways['tbi-loan'] );
 
             return $gateways;
         }
 
-        if( floatval( WC()->cart->get_total( 'edit' ) ) < 100 ) {
-            unset( $gateways[ 'tbi-bnpl' ] );
+        $cart_total = floatval( WC()->cart->get_total( 'edit' ) );
+
+        if( $cart_total < 100 ) {
+            unset( $gateways[ 'tbi-loan' ] );
+        }
+
+        if( $cart_total < 40 || $cart_total >= 400 ) {
+            unset( $gateways['tbi-bnpl'] );
         }
 
         return $gateways;
@@ -56,5 +64,13 @@ class Checkout {
         }
 
         return $settings['enabled'] === 'yes'; 
+    }
+
+    public function register_gateways( $methods ) {
+        $methods[ 'tbi' ]      = Gateways\TBIPaymentGateway::class;
+        $methods[ 'tbi-bnpl' ] = Gateways\TBIBNPLPaymentGateway::class;
+        $methods[ 'tbi-loan' ] = Gateways\TBILoanPaymentGateway::class;
+
+        return $methods;
     }
 }
