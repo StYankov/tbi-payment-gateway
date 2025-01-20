@@ -1,6 +1,6 @@
 <?php
 
-namespace SKills\TbiPaymentGateway;
+namespace Skills\TbiPaymentGateway\REST;
 
 use WP_REST_Request;
 

@@ -41,7 +41,7 @@
         <div class="loan-params__row">
             <span class="loan-params__label">
                 ГПР 
-                <span class="info-icon">
+                <span class="info-icon" id="apr-info">
                     <?php echo $infoIcon; ?>
                 </span>
             </span>
@@ -52,7 +52,7 @@
         <div class="loan-params__row">
             <span class="loan-params__label">
                 ГЛП
-                <span class="info-icon">
+                <span class="info-icon" id="nir-info">
                     <?php echo $infoIcon; ?>
                 </span>
             </span>

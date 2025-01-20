@@ -8,6 +8,7 @@ function initPaymentOption() {
     }
 
     jQuery( document.body ).on( 'change', '[name="bnpl_installment"]', onPlanChange );
+    jQuery( document.body ).on( 'updated_checkout', initTippy );
 }
 
 /**
@@ -59,4 +60,22 @@ function roundUp( amount, precision = 2) {
     const fig = Math.pow(10, precision);
 
     return Math.ceil( amount * fig ) / fig;
+}
+
+function initTippy() {
+    if( ! window.tippy ) {
+        return;
+    }
+
+    window.tippy( '#apr-info', {
+        content: 'С него можеш точно да изчислиш процента на разходите върху заетата сума, която дължиш на кредитора. За ползвателите на кредити е важно да са наясно предварително какво е пълното оскъпяване на тяхното задължение.',
+        trigger: 'mouseenter click',
+        delay: [null, 200]
+    } );
+
+    window.tippy( '#nir-info', {
+        content: 'Това е лихвата, която потребителят плаща за използвания кредит за срок от една година. Това е цената на самият кредит, сметната средно при срок от 12 месеца.',
+        trigger: 'mouseenter click',    
+        delay: [null, 200]
+    } );
 }

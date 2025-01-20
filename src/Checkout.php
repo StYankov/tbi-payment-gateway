@@ -53,11 +53,14 @@ class Checkout {
 
         wp_enqueue_style( 'tbibnpl-checkout', Plugin::get_plugin_url() . '/assets/styles.css' );
         wp_enqueue_script( 'tbibnpl-checkout', Plugin::get_plugin_url() . '/assets/checkout.js', [], 1.0, true );
+        wp_enqueue_script( 'popperjs', 'https://unpkg.com/@popperjs/core@2', [ 'tbibnpl-checkout' ], 1, true );
+        wp_enqueue_script( 'tippy', 'https://unpkg.com/tippy.js@6', [ 'tbibnpl-checkout', 'popperjs' ], 1, true );
+
         wp_add_inline_script( 'tbibnpl-checkout', 'window.bnpl_data = ' . json_encode( $data ), 'before' );
     }
 
     public function is_bnpl_enabled(): bool {
-        $settings = get_option( 'woocommerce_tbi-bnpl_settings', [] );
+        $settings = get_option( 'woocommerce_tbi-loan_settings', [] );
 
         if( empty( $settings ) || empty( $settings['enabled'] ) ) {
             return false;

@@ -12,8 +12,8 @@ final class Plugin {
     }
 
     public function register_rest() {
-        new Callback();
-        new BNPLCallback();
+        new REST\Callback();
+        new REST\BNPLCallback();
     }
 
     public static function init() {
