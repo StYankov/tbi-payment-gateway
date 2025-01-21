@@ -123,8 +123,8 @@ class BNPLClient {
         return 'https://beta.tbibank.support';
     }
 
-    public static function get_client() {
-        $settings = get_option( 'woocommerce_tbi-bnpl_settings' );
+    public static function get_client( $type = 'bnpl' ) {
+        $settings = get_option( sprintf( 'woocommerce_tbi-%s_settings', $type ) );
 
         if( empty( $settings ) ) {
             throw new Error( 'TBI BNPL settings are empty' );

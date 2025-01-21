@@ -111,7 +111,7 @@ class TBILoanPaymentGateway extends WC_Payment_Gateway {
     }
 
     public function payment_fields() {
-        $client       = BNPLClient::get_client();
+        $client       = BNPLClient::get_client( 'loan' );
         $data         = $this->get_posted_data();
         $cart_total   = floatval( WC()->cart->get_total( 'edit' ) );
         $installments = $client->get_installments( absint( $cart_total ) );
@@ -142,7 +142,11 @@ class TBILoanPaymentGateway extends WC_Payment_Gateway {
         return $data;
     }
 
-    private function get_selected_plan( array $installments, int $selected_id ): ?array {
+    private function get_selected_plan( array $installments, int $selected_id ): array | null {
+        if( empty( $installments ) ) {
+            return null;
+        }
+        
         foreach( $installments as $item ) {
             if( $item['id'] === $selected_id ) {
                 return $item;

@@ -16,6 +16,10 @@ class Checkout {
             return $gateways;
         }
 
+        if( ! WC()->cart ) {
+            return $gateways;
+        }
+
         try {
             BNPLClient::get_client();
         } catch( Exception $e ) {
