@@ -47,12 +47,6 @@ class TBIBNPLPaymentGateway extends WC_Payment_Gateway {
                 'description' => __( 'This controls the description shown during checkout.', 'tbi-payment-gateway' ),
                 'default'     => __( 'Pay securely through TBI BNPL Bank.', 'tbi-payment-gateway' ),
             ],
-            'test_mode'    => [
-                'title'       => __( 'Test Mode', 'tbi-payment-gateway' ),
-                'type'        => 'checkbox',
-                'label'       => __( 'Enable Test Mode', 'tbi-payment-gateway' ),
-                'default'     => 'yes',
-            ],
             'reseller_code' => [
                 'title'       => __( 'Reseller Code', 'tbi-payment-gateway' ),
                 'type'        => 'text',
