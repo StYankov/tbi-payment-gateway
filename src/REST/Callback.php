@@ -2,6 +2,7 @@
 
 namespace Skills\TbiPaymentGateway\REST;
 
+use Skills\TbiPaymentGateway\TBISettings;
 use WP_REST_Request;
 use WP_REST_Response;
 
