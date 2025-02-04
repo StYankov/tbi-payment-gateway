@@ -34,8 +34,14 @@ class Callback {
     }
 
     public function handle( WP_REST_Request $request ) {
+        error_log( json_encode( $request->get_params() ) );
+
         if( ! $this->verify_checksum( $request ) ) {
             return new WP_REST_Response( [ 'error' => 'Invalid checksum' ], 400 );
+        }
+
+        if( absint( $request->get_param( 'status' ) ) !== 1 ) {
+            return new WP_REST_Response( [ 'error' => 'Invalid status' ], 400 );
         }
 
         $order = $this->get_order( $request->get_param( 'orderNumber' ) );
