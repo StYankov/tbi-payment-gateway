@@ -9,6 +9,7 @@ final class Plugin {
         add_action( 'rest_api_init', [ $this, 'register_rest' ] );
 
         new Checkout();
+        new Orders();
     }
 
     public function register_rest() {
