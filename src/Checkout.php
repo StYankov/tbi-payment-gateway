@@ -2,11 +2,12 @@
 
 namespace Skills\TbiPaymentGateway;
 
-use Exception;
+use Error;
 
 class Checkout {
     public function __construct() {
         add_filter( 'woocommerce_available_payment_gateways', [ $this, 'maybe_hide_bnpl_method' ] );
+        add_filter( 'woocommerce_available_payment_gateways', [ $this, 'maybe_hide_tbi_loan_method' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'maybe_enqueue_checkout_script' ] );
         add_filter( 'woocommerce_payment_gateways', [ $this, 'register_gateways' ] );
     }
@@ -20,10 +21,43 @@ class Checkout {
             return $gateways;
         }
 
+        if( false === in_array( 'tbi-bnpl', $gateways ) ) {
+            return $gateways;
+        }
+
         try {
-            BNPLClient::get_client();
-        } catch( Exception $e ) {
+            BNPLClient::get_client( 'bnpl' );
+        } catch( Error $e ) {
             unset( $gateways['tbi-bnpl'] );
+
+            return $gateways;
+        }
+
+        $cart_total = floatval( WC()->cart->get_total( 'edit' ) );
+
+        if( $cart_total < 40 || $cart_total >= 400 ) {
+            unset( $gateways['tbi-bnpl'] );
+        }
+
+        return $gateways;
+    }
+
+    public function maybe_hide_tbi_loan_method( array $gateways ) {
+        if( is_admin() ) {
+            return $gateways;
+        }
+
+        if( ! WC()->cart ) {
+            return $gateways;
+        }
+
+        if( false === in_array( 'tbi-loan', $gateways ) ) {
+            return $gateways;
+        }
+
+        try {
+            BNPLClient::get_client( 'loan' );
+        } catch( Error $e ) {
             unset( $gateways['tbi-loan'] );
 
             return $gateways;
@@ -32,11 +66,7 @@ class Checkout {
         $cart_total = floatval( WC()->cart->get_total( 'edit' ) );
 
         if( $cart_total < 100 ) {
-            unset( $gateways[ 'tbi-loan' ] );
-        }
-
-        if( $cart_total < 40 || $cart_total >= 400 ) {
-            unset( $gateways['tbi-bnpl'] );
+            unset( $gateways['tbi-loan'] );
         }
 
         return $gateways;
