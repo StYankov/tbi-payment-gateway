@@ -111,6 +111,10 @@ class TBILoanPaymentGateway extends WC_Payment_Gateway {
         $installments = $client->get_installments( absint( $cart_total ) );
         $current_plan = $this->get_selected_plan( $installments, isset( $data['bnpl_installment'] ) ? absint( $data['bnpl_installment'] ) : 0 );
 
+        if( empty( $current_plan ) ) {
+            return;
+        }
+
         Templates::render( 'bnpl-options.php', [
             'installments' => $installments,
             'selected'     => $current_plan,
