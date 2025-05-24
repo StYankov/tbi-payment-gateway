@@ -114,7 +114,9 @@ class TBIFixedLoanPaymentGateway extends WC_Payment_Gateway {
         $client       = BNPLClient::get_client( 'loan-fixed' );
         $installments = $client->get_installments();
 
-        $options      = [];
+        $options      = [
+            '' => __( 'None', 'tbi-payment-gateway' )
+        ];
 
         if( empty( $installments ) ) {
             return [];
