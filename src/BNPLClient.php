@@ -28,7 +28,11 @@ class BNPLClient {
 
             $data = json_decode( wp_remote_retrieve_body( $response ), true );
 
-            set_transient( 'tbi_bnpl_installments', $data, 60 * 60 * 4 );
+            if( empty( $data['error'] ) ) {
+                set_transient( 'tbi_bnpl_installments', $data, 60 * 60 * 4 );
+            } else {
+                $data = [];
+            }
         }
 
         if( ! $amount ) {
