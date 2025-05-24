@@ -8,16 +8,13 @@ class Checkout {
     public function __construct() {
         add_filter( 'woocommerce_available_payment_gateways', [ $this, 'maybe_hide_bnpl_method' ] );
         add_filter( 'woocommerce_available_payment_gateways', [ $this, 'maybe_hide_tbi_loan_method' ] );
+        add_filter( 'woocommerce_available_payment_gateways', [ $this, 'maybe_hide_tbi_fixed_loan_method' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'maybe_enqueue_checkout_script' ] );
         add_filter( 'woocommerce_payment_gateways', [ $this, 'register_gateways' ] );
     }
 
     public function maybe_hide_bnpl_method( array $gateways ) {
-        if( is_admin() ) {
-            return $gateways;
-        }
-
-        if( ! WC()->cart ) {
+        if( is_admin() || empty( WC()->cart ) ) {
             return $gateways;
         }
 
@@ -25,9 +22,7 @@ class Checkout {
             return $gateways;
         }
 
-        try {
-            BNPLClient::get_client( 'bnpl' );
-        } catch( Error $e ) {
+        if( BNPLClient::get_client( 'bnpl' )->is_empty() ) {
             unset( $gateways['tbi-bnpl'] );
 
             return $gateways;
@@ -43,11 +38,7 @@ class Checkout {
     }
 
     public function maybe_hide_tbi_loan_method( array $gateways ) {
-        if( is_admin() ) {
-            return $gateways;
-        }
-
-        if( ! WC()->cart ) {
+        if( is_admin() || empty( WC()->cart ) ) {
             return $gateways;
         }
 
@@ -55,9 +46,7 @@ class Checkout {
             return $gateways;
         }
 
-        try {
-            BNPLClient::get_client( 'loan' );
-        } catch( Error $e ) {
+        if( BNPLClient::get_client( 'loan' )->is_empty() ) {
             unset( $gateways['tbi-loan'] );
 
             return $gateways;
@@ -67,6 +56,30 @@ class Checkout {
 
         if( $cart_total < 100 ) {
             unset( $gateways['tbi-loan'] );
+        }
+
+        return $gateways;
+    }
+
+    public function maybe_hide_tbi_fixed_loan_method( array $gateways ) {
+        if( is_admin() || empty( WC()->cart ) ) {
+            return $gateways;
+        }
+
+        if( false === in_array( 'tbi-loan-fixed', $gateways ) ) {
+            return $gateways;
+        }
+
+        if( BNPLClient::get_client( 'loan-fixed' )->is_empty() ) {
+            unset( $gateways['tbi-loan-fixed'] );
+
+            return $gateways;
+        }
+
+        $cart_total = floatval( WC()->cart->get_total( 'edit' ) );
+
+        if( $cart_total < 100 ) {
+            unset( $gateways['tbi-loan-fixed'] );
         }
 
         return $gateways;
@@ -104,9 +117,10 @@ class Checkout {
     }
 
     public function register_gateways( $methods ) {
-        $methods[ 'tbi' ]      = Gateways\TBIPaymentGateway::class;
-        $methods[ 'tbi-bnpl' ] = Gateways\TBIBNPLPaymentGateway::class;
-        $methods[ 'tbi-loan' ] = Gateways\TBILoanPaymentGateway::class;
+        $methods[ 'tbi' ]            = Gateways\TBIPaymentGateway::class;
+        $methods[ 'tbi-bnpl' ]       = Gateways\TBIBNPLPaymentGateway::class;
+        $methods[ 'tbi-loan' ]       = Gateways\TBILoanPaymentGateway::class;
+        $methods[ 'tbi-loan-fixed' ] = Gateways\TBIFixedLoanPaymentGateway::class;
 
         return $methods;
     }

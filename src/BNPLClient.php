@@ -2,12 +2,19 @@
 
 namespace Skills\TbiPaymentGateway;
 
-use Error;
 use Exception;
 use WC_Order;
 
 class BNPLClient {
-    public function __construct( public string $resellerCode, public string $resellerKey, public string $encryptionKey ) { }
+    public string $resellerCode;
+    public string $resellerKey;
+    public string $encryptionKey;
+
+    public function __construct( public array $settings ) {
+        $this->resellerCode  = isset( $settings['reseller_code'] ) ? $settings['reseller_code'] : '';
+        $this->resellerKey   = isset( $settings['reseller_key'] ) ? $settings['reseller_key'] : '';
+        $this->encryptionKey = isset( $settings['encryption_key'] ) ? $settings['encryption_key'] : '';
+    }
 
     public function get_installments( ?float $amount = null ) {
         $data = get_transient( 'tbi_bnpl_installments' );
@@ -124,20 +131,12 @@ class BNPLClient {
     }
 
     public static function get_client( $type = 'bnpl' ) {
-        $settings = get_option( sprintf( 'woocommerce_tbi-%s_settings', $type ) );
+        $settings = get_option( sprintf( 'woocommerce_tbi-%s_settings', $type ), [] );
 
-        if( empty( $settings ) ) {
-            throw new Error( 'TBI BNPL settings are empty' );
-        }
+        return new self( $settings );
+    }
 
-        $reseller_code  = isset( $settings['reseller_code'] ) ? $settings['reseller_code'] : null;
-        $reseller_key   = isset( $settings['reseller_key'] ) ? $settings['reseller_key'] : null;
-        $encryption_key = isset( $settings['encryption_key'] ) ? $settings['encryption_key'] : null;
-
-        if( ! $reseller_code || ! $reseller_key || ! $encryption_key ) {
-            throw new Error( 'TBI BNPL settings are empty' );
-        }
-
-        return new self( $reseller_code, $reseller_key, $encryption_key );
+    public function is_empty(): bool {
+        return empty( $this->resellerCode ) || empty( $this->resellerKey ) || empty( $this->encryptionKey );
     }
 }

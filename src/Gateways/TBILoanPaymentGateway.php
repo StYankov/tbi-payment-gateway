@@ -83,7 +83,7 @@ class TBILoanPaymentGateway extends WC_Payment_Gateway {
     
     public function process_payment( $order_id ) {
         $order          = wc_get_order( $order_id );
-        $bnpl_client    = new BNPLClient( $this->get_option( 'reseller_code' ), $this->get_option( 'reseller_key' ), $this->get_option( 'encryption_key' ) );
+        $bnpl_client    = BNPLClient::get_client( 'loan' );
         $installment_id = isset( $_POST['bnpl_installment'] ) ? absint( $_POST['bnpl_installment'] ) : null;
 
         try {
@@ -105,10 +105,9 @@ class TBILoanPaymentGateway extends WC_Payment_Gateway {
     }
 
     public function payment_fields() {
-        $client       = BNPLClient::get_client( 'loan' );
         $data         = $this->get_posted_data();
         $cart_total   = floatval( WC()->cart->get_total( 'edit' ) );
-        $installments = $client->get_installments( absint( $cart_total ) );
+        $installments = $this->get_installments();
         $current_plan = $this->get_selected_plan( $installments, isset( $data['bnpl_installment'] ) ? absint( $data['bnpl_installment'] ) : 0 );
 
         if( empty( $current_plan ) ) {
@@ -162,5 +161,22 @@ class TBILoanPaymentGateway extends WC_Payment_Gateway {
 
     public function get_icon() {
         return '';
+    }
+
+    public function get_installments() {
+        $client       = BNPLClient::get_client( 'loan' );
+        $client_fixed = BNPLClient::get_client( 'loan-fixed' );
+        $cart_total   = floatval( WC()->cart->get_total( 'edit' ) );
+        $installments = $client->get_installments( absint( $cart_total ) );
+
+        if( ! empty( $client_fixed->settings ) && ! empty( $client_fixed->settings['installment_id'] ) ) {
+            $installment_id = absint( $client_fixed->settings['installment_id'] );
+
+            $installments = array_filter( $installments, function( $item ) use( $installment_id ) {
+                return $item['id'] !== $installment_id;
+            } );
+        }
+
+        return $installments;
     }
 }

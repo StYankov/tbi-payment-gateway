@@ -7,14 +7,13 @@ use Skills\TbiPaymentGateway\BNPLClient;
 use Skills\TbiPaymentGateway\Plugin;
 use WC_Payment_Gateway;
 
-class TBIBNPLPaymentGateway extends WC_Payment_Gateway {
+class TBIFixedLoanPaymentGateway extends WC_Payment_Gateway {
     public function __construct() {
-        $this->id                 = 'tbi-bnpl';
-        $this->method_title       = __( 'TBI BNPL Payment', 'tbi-payment-gateway' );
-        $this->method_description = __( 'Accept payments through TBI BNPL payment scheme.', 'tbi-payment-gateway' );   
+        $this->id                 = 'tbi-loan-fixed';
+        $this->method_title       = __( 'TBI Loan Fixed', 'tbi-payment-gateway' );
+        $this->method_description = __( 'Accept payments through TBI loan payment scheme which is selected from admin panel.', 'tbi-payment-gateway' );   
         $this->has_fields         = true;
         $this->icon               = Plugin::get_plugin_url() . '/assets/tbi-logo.png';
-
 
         $this->init_form_fields();
         $this->init_settings();
@@ -31,21 +30,21 @@ class TBIBNPLPaymentGateway extends WC_Payment_Gateway {
             'enabled' => [
                 'title'       => __( 'Enable/Disable', 'tbi-payment-gateway' ),
                 'type'        => 'checkbox',
-                'label'       => __( 'Enable TBI BNPL Payment Gateway', 'tbi-payment-gateway' ),
+                'label'       => __( 'Enable TBI Fixed Loan Payment Gateway', 'tbi-payment-gateway' ),
                 'default'     => 'no',
             ],
             'title' => [
                 'title'       => __('Title', 'tbi-payment-gateway'),
                 'type'        => 'text',
                 'description' => __( 'This controls the title shown during checkout.', 'tbi-payment-gateway' ),
-                'default'     => __( 'TBI BNPL Payment', 'tbi-payment-gateway' ),
+                'default'     => __( 'TBI Fixed Loan Payment', 'tbi-payment-gateway' ),
                 'desc_tip'    => true,
             ],
             'description' => [
                 'title'       => __( 'Description', 'tbi-payment-gateway'),
                 'type'        => 'textarea',
                 'description' => __( 'This controls the description shown during checkout.', 'tbi-payment-gateway' ),
-                'default'     => __( 'Pay securely through TBI BNPL Bank.', 'tbi-payment-gateway' ),
+                'default'     => __( 'Pay securely through using a TBI loan', 'tbi-payment-gateway' ),
             ],
             'reseller_code' => [
                 'title'       => __( 'Reseller Code', 'tbi-payment-gateway' ),
@@ -78,17 +77,25 @@ class TBIBNPLPaymentGateway extends WC_Payment_Gateway {
                     'readonly' => 'readonly',
                 ],
             ],
+            'installment_id' => [
+                'title'       => __( 'Selected Installment', 'tbi-payment-gateway' ),
+                'type'        => 'select',
+                'description' => __( 'Select which installment this payment method will be fixed to. You need to enter reseller code and key first!', 'tbi-payment-gateway' ),
+                'desc_tip'    => true,
+                'options'     => $this->get_installment_options()
+            ]
         ];
     }
-    
+
     public function process_payment( $order_id ) {
         $order          = wc_get_order( $order_id );
-        $bnpl_client    = BNPLClient::get_client( 'bnpl' );
-        
-        try {
-            $data = $bnpl_client->create_application( $order );
+        $client         = BNPLClient::get_client( 'loan-fixed' );
+        $installment_id = $this->get_option( 'installment_id' );
 
-            $order->update_meta_data( '_tbi_bnpl_token', $data['token'] );
+        try {
+            $data = $client->create_application( $order, $installment_id );
+
+            $order->update_meta_data( '_tbi_loan_token', $data['token'] );
             $order->save_meta_data();
 
             return [
@@ -103,10 +110,21 @@ class TBIBNPLPaymentGateway extends WC_Payment_Gateway {
         }
     }
 
-    public function round_up( float $number, int $precision = 2 ): float {
-        $fig = pow( 10, $precision );
+    private function get_installment_options() {
+        $client       = BNPLClient::get_client( 'loan-fixed' );
+        $installments = $client->get_installments();
 
-        return ceil( $number * $fig ) / $fig;
+        $options      = [];
+
+        if( empty( $installments ) ) {
+            return [];
+        }
+
+        foreach( $installments as $item ) {
+            $options[ $item['id'] ] = sprintf( '%1$s | %4$s (%2$s - %3$s)', $item['name'], $item['amount_min'], $item['amount_max'], $item['bank_product'] );
+        }
+
+        return $options;
     }
 
     public function get_icon() {
