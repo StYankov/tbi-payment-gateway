@@ -111,6 +111,10 @@ class TBIFixedLoanPaymentGateway extends WC_Payment_Gateway {
     }
 
     private function get_installment_options() {
+        if( $this->enabled === 'no' ) {
+            return [];
+        }
+
         $client       = BNPLClient::get_client( 'loan-fixed' );
         $installments = $client->get_installments();
 
