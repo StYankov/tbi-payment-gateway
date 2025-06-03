@@ -18,7 +18,7 @@ class Checkout {
             return $gateways;
         }
 
-        if( false === in_array( 'tbi-bnpl', $gateways ) ) {
+        if( false === array_key_exists( 'tbi-bnpl', $gateways ) ) {
             return $gateways;
         }
 
@@ -42,7 +42,7 @@ class Checkout {
             return $gateways;
         }
 
-        if( false === in_array( 'tbi-loan', $gateways ) ) {
+        if( false === array_key_exists( 'tbi-loan', $gateways ) ) {
             return $gateways;
         }
 
@@ -66,7 +66,7 @@ class Checkout {
             return $gateways;
         }
 
-        if( false === in_array( 'tbi-loan-fixed', $gateways ) ) {
+        if( false === array_key_exists( 'tbi-loan-fixed', $gateways ) ) {
             return $gateways;
         }
 
