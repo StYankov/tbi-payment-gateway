@@ -111,7 +111,7 @@ class TBIFixedLoanPaymentGateway extends WC_Payment_Gateway {
     }
 
     private function get_installment_options() {
-        if( $this->enabled === 'no' ) {
+        if( $this->enabled !== 'yes' ) {
             return [];
         }
 
