@@ -17,6 +17,10 @@ class BNPLClient {
     }
 
     public function get_installments( ?float $amount = null ) {
+        if( empty( $this->resellerCode ) || empty( $this->resellerKey ) ) {
+            return [];
+        }
+
         $data = get_transient( 'tbi_bnpl_installments' );
 
         if( empty( $data ) ) {
