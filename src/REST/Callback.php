@@ -48,7 +48,7 @@ class Callback {
 
         WC()->mailer();
 
-        $order->payment_complete();
+        $order->payment_complete( $request->get_param( 'mdOrder' ) );
 
         return new WP_REST_Response( [ 'success' => true ] );
     }
