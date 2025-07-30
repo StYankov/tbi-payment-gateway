@@ -30,6 +30,10 @@ class BNPLClient {
                 return [];
             }
 
+            if( wp_remote_retrieve_response_code( $response ) !== 200 ) {
+                return [];
+            }
+
             $data = json_decode( wp_remote_retrieve_body( $response ), true );
 
             if( empty( $data['error'] ) ) {
